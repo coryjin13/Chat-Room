@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Group Chat</title>
+	<script src= 'http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+	<!-- <script src= 'jquery/src/jquery.js'></script> -->
+	<script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		var socket = io.connect()
+		var user = prompt("What's your name?")
+		socket.emit('userName',{name: user})
+		socket.on('userNamereceived', function(data){
+			console.log(data)
+			$('body').prepend('<h1>Welcome '+data.name+'!</h1>');
+			$('.chat').fadeIn(450)
+			for(var i = 0; i < data.messageHistory; i++){
+				$('.messages').append("<p class = 'message'>"+ data.name +": " + data.message+"</p>")
+			}
+		});
+		$(document).submit(function(e){
+			e.preventDefault()
+			var message = $('#message').val()
+			$('#message').val('')
+			socket.emit('chatting', {name: user, message: message})
+		})
+		$(document).ready(function(){
+		    $('#message').keypress(function(e){
+		      if(e.keyCode==13)
+		      $('button').click();
+		    });
+		});
+		socket.on('chatReceived', function(data){
+			console.log(data)
+			$('.messages').append("<p class = 'message'>"+ data.name +": " + data.message+"</p>")
+		})
+	})
+
+	</script>
+	<style>
+		html{
+			text-align: center;
+			background-color:black;
+			color: yellow;
+			font-weight: bold;
+			font-family:fantasy;
+		}
+		#chat{
+			margin: 0 auto;
+			border: ridge 10px;
+			width:500px;
+		}
+		.messages{
+			overflow-y: auto;
+			border: pink double 5px;
+			padding: 10px;
+		}
+		#message{
+			background-color: #CCCCCC;
+			font-weight:bold;
+			width:450px;
+		}
+	</style>
+
+</head>
+<body>
+	<h3>Conversation Board</h3>
+	<div id="chat">
+		<div class="messages">
+<!-- 			<p class="message">Cory: Hello</p>
+			<p class="message">Mike: Hi</p> -->
+		</div>
+	</div>
+	<br>
+	<form>
+		<textarea id='message' name='message'></textarea>
+		<button>Chat</button>
+	</form>
+
+</body>
+</html>
